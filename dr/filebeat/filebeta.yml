@@ -1,0 +1,10 @@
+filebeat.inputs:
+  - type: log
+    enabled: true
+    paths:
+      - /Users/huyinghuan/Downloads/shorturl/*.log
+    fields:
+      app_id: short_visit_history
+    fields_under_root: true
+output.logstash:
+  hosts: ["localhost:5044"]

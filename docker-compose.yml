@@ -1,0 +1,46 @@
+version: "2.2"
+services:
+  esshort:
+    image: elasticsearch:7.7.0
+    container_name: esshort
+    environment:
+      - discovery.type=single-node
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    volumes:
+      - ./tmp/es-data:/usr/share/elasticsearch/data
+    networks:
+      - elastic_short
+  logstash_short:
+    image: logstash:7.7.0
+    container_name: logstash_short
+    environment:
+      ES_SERVER: "esshort:9200"
+    ports:
+      - 5044:5044
+    volumes:
+      - ./dr/logstash/pipeline/:/usr/share/logstash/pipeline/
+      - ./dr/logstash/logstash.yml:/usr/share/logstash/config/logstash.yml
+    networks:
+      - elastic_short
+  kibana:
+    image: kibana:7.7.0
+    container_name: esui_short
+    ports:
+      - 5601:5601
+    environment:
+      SERVER_NAME: kibana
+      ELASTICSEARCH_HOSTS: http://esshort:9200
+    networks:
+      - elastic_short
+networks:
+  elastic_short:
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+        - subnet: 172.16.21.0/24
+          gateway: 172.16.21.1
